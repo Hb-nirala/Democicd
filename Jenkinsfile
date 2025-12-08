@@ -77,7 +77,7 @@ pipeline {
 
                     <p><b>Job:</b> ${JOB_NAME}</p>
                     <p><b>Build:</b> #${BUILD_NUMBER}</p>
-                    <p><b>Status:</b> ${BUILD_STATUS}</p>
+                    <p><b>Status:</b> ${currentBuild.currentResult}</p>
 
                     <p>Download Jenkins console:</p>
                     ${BUILD_URL}
