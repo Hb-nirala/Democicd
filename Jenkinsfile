@@ -67,11 +67,41 @@ pipeline {
                 archiveArtifacts artifacts: 'build-output/*.apk', fingerprint: true
             }
         }
+
+        stage('Send Email with APK') {
+            steps {
+                emailext(
+                subject: "✅ APK Build Ready - ${JOB_NAME} #${BUILD_NUMBER}",
+                body: """
+                    <h2>✅ React Native Debug APK Ready</h2>
+
+                    <p><b>Job:</b> ${JOB_NAME}</p>
+                    <p><b>Build:</b> #${BUILD_NUMBER}</p>
+                    <p><b>Status:</b> ${BUILD_STATUS}</p>
+
+                    <p>Download Jenkins console:</p>
+                    ${BUILD_URL}
+
+                    <br><br>
+                    <b>APK attached.</b>
+                    """,
+                    to: "nirala.kumar@hiddenbrains.in",
+                    attachmentsPattern: "build-output/*.apk",
+                    mimeType: "text/html"
+                )
+            }
+        }
     }
+
 
     post {
         success {
-            echo "✅ APK build ready — download from Jenkins artifacts and install on your device"
+            emailext(
+            subject: "✅ APK Build Ready",
+            body: "APK attached — Jenkins build ${BUILD_NUMBER}",
+            to: "your-email@gmail.com",
+            attachmentsPattern: "build-output/*.apk"
+        )
         }
 
         failure {
