@@ -99,7 +99,7 @@ pipeline {
             emailext(
             subject: "✅ APK Build Ready",
             body: "APK attached — Jenkins build ${BUILD_NUMBER}",
-            to: "your-email@gmail.com",
+            to: "nirala.kumar@hiddenbrains.in",
             attachmentsPattern: "build-output/*.apk"
         )
         }
