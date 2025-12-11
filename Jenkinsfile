@@ -67,45 +67,46 @@ pipeline {
                 archiveArtifacts artifacts: 'build-output/*.apk', fingerprint: true
             }
         }
-
-        stage('Send Email with APK') {
-            steps {
-                emailext(
-                subject: "✅ APK Build Ready - ${JOB_NAME} #${BUILD_NUMBER}",
+    }
+    
+    post {
+        success {
+            emailext(
+                subject: "✅ APK Build Success - ${JOB_NAME} #${BUILD_NUMBER}",
                 body: """
-                    <h2>✅ React Native Debug APK Ready</h2>
+                    <h2>✅ React Native APK Build Successful</h2>
 
                     <p><b>Job:</b> ${JOB_NAME}</p>
                     <p><b>Build:</b> #${BUILD_NUMBER}</p>
                     <p><b>Status:</b> ${currentBuild.currentResult}</p>
 
-                    <p>Download Jenkins console:</p>
-                    ${BUILD_URL}
+                    <p>Download APK:</p>
+                    ${BUILD_URL}artifact/build-output/
 
                     <br><br>
-                    <b>APK attached.</b>
-                    """,
-                    to: "nirala.kumar@hiddenbrains.in",
-                    attachmentsPattern: "build-output/*.apk",
-                    mimeType: "text/html"
-                )
-            }
+                    <b>APK is attached.</b>
+                """,
+                to: "nirala.kumar@hiddenbrains.in",
+                attachmentsPattern: "build-output/*.apk",
+                mimeType: "text/html"
+            )
         }
-    }
-
-
-    post {
-        success {
-            emailext(
-            subject: "✅ APK Build Ready",
-            body: "APK attached — Jenkins build ${BUILD_NUMBER}",
-            to: "nirala.kumar@hiddenbrains.in",
-            attachmentsPattern: "build-output/*.apk"
-        )
-        }
-
         failure {
-            echo "❌ Build failed — check Jenkins console logs"
+            emailext(
+                subject: "❌ APK Build FAILED - ${JOB_NAME} #${BUILD_NUMBER}",
+                body: """
+                    <h2>❌ React Native APK Build FAILED</h2>
+
+                    <p><b>Job:</b> ${JOB_NAME}</p>
+                    <p><b>Build:</b> #${BUILD_NUMBER}</p>
+                    <p><b>Status:</b> ${currentBuild.currentResult}</p>
+
+                    <p>Please check the console output for errors:</p>
+                    ${BUILD_URL}console
+                """,
+                to: "nirala.kumar@hiddenbrains.in",
+                mimeType: "text/html"
+            )
         }
     }
 }
