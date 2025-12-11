@@ -68,7 +68,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             emailext(
@@ -87,7 +87,6 @@ pipeline {
                     <b>APK is attached.</b>
                 """,
                 to: "nirala.kumar@hiddenbrains.in",
-                attachmentsPattern: "build-output/*.apk",
                 mimeType: "text/html"
             )
         }
