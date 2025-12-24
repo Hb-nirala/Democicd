@@ -52,21 +52,6 @@ pipeline {
                 '''
             }
         }
-
-        stage('Collect APK Artifact') {
-            steps {
-                sh '''
-                mkdir -p build-output
-                cp android/app/build/outputs/apk/debug/app-debug.apk build-output/
-                '''
-            }
-        }
-
-        stage('Archive APK') {
-            steps {
-                archiveArtifacts artifacts: 'build-output/*.apk', fingerprint: true
-            }
-        }
     }
 
     post {
@@ -80,11 +65,8 @@ pipeline {
                     <p><b>Build:</b> #${BUILD_NUMBER}</p>
                     <p><b>Status:</b> ${currentBuild.currentResult}</p>
 
-                    <p>Download APK:</p>
-                    ${BUILD_URL}artifact/build-output/
-
-                    <br><br>
-                    <b>APK is attached.</b>
+                    <p>You can view the build details here:</p>
+                    <a href="${BUILD_URL}">${BUILD_URL}</a>
                 """,
                 to: "nirala.kumar@hiddenbrains.in",
                 mimeType: "text/html"
@@ -100,8 +82,8 @@ pipeline {
                     <p><b>Build:</b> #${BUILD_NUMBER}</p>
                     <p><b>Status:</b> ${currentBuild.currentResult}</p>
 
-                    <p>Please check the console output for errors:</p>
-                    ${BUILD_URL}console
+                    <p>Check the console logs:</p>
+                    <a href="${BUILD_URL}console">${BUILD_URL}console</a>
                 """,
                 to: "nirala.kumar@hiddenbrains.in",
                 mimeType: "text/html"
