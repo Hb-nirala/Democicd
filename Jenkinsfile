@@ -68,7 +68,7 @@ pipeline {
                     <p>You can view the build details here:</p>
                     <a href="${BUILD_URL}">${BUILD_URL}</a>
                 """,
-                to: "nirala.kumar@hiddenbrains.in",
+                to: "niralak025@gmail.com",
                 mimeType: "text/html"
             )
         }
@@ -85,7 +85,7 @@ pipeline {
                     <p>Check the console logs:</p>
                     <a href="${BUILD_URL}console">${BUILD_URL}console</a>
                 """,
-                to: "nirala.kumar@hiddenbrains.in",
+                to: "niralak025@gmail.com",
                 mimeType: "text/html"
             )
         }
