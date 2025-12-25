@@ -100,10 +100,11 @@ pipeline {
             }
             steps {
                 script {
-                    if (params.KEYSTORE_PASSWORD?.trim()) {
+                    def keystorePassword = params.KEYSTORE_PASSWORD == null ? "" : params.KEYSTORE_PASSWORD.toString()
+                    if (keystorePassword.trim()) {
                         withEnv([
-                            "MYAPP_RELEASE_STORE_PASSWORD=${params.KEYSTORE_PASSWORD}",
-                            "MYAPP_RELEASE_KEY_PASSWORD=${params.KEYSTORE_PASSWORD}",
+                            "MYAPP_RELEASE_STORE_PASSWORD=${keystorePassword}",
+                            "MYAPP_RELEASE_KEY_PASSWORD=${keystorePassword}",
                         ]) {
                             sh '''
                             cd android
@@ -131,10 +132,11 @@ pipeline {
             }
             steps {
                 script {
-                    if (params.KEYSTORE_PASSWORD?.trim()) {
+                    def keystorePassword = params.KEYSTORE_PASSWORD == null ? "" : params.KEYSTORE_PASSWORD.toString()
+                    if (keystorePassword.trim()) {
                         withEnv([
-                            "MYAPP_RELEASE_STORE_PASSWORD=${params.KEYSTORE_PASSWORD}",
-                            "MYAPP_RELEASE_KEY_PASSWORD=${params.KEYSTORE_PASSWORD}",
+                            "MYAPP_RELEASE_STORE_PASSWORD=${keystorePassword}",
+                            "MYAPP_RELEASE_KEY_PASSWORD=${keystorePassword}",
                         ]) {
                             sh '''
                             cd android
