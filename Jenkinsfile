@@ -3,8 +3,8 @@ pipeline {
 
     parameters {
         choice(
-            name: 'BUILD_TYPE',
-            choices: ['DEBUG_APK', 'RELEASE_APK', 'RELEASE_AAB'],
+            name: 'BUILDTYPE',
+            choices: ['debug-apk', 'release-apk', 'release-aab'],
             description: 'Select Android build type'
         )
     }
@@ -48,7 +48,7 @@ pipeline {
 
         stage('Generate JS Bundle (Release)') {
             when {
-                expression { params.BUILD_TYPE != 'debug-apk' }
+                expression { params.BUILDTYPE != 'debug-apk' }
             }
             steps {
                 sh '''
@@ -75,7 +75,7 @@ pipeline {
 
         stage('Build Debug APK') {
             when {
-                expression { params.BUILD_TYPE == 'debug-apk' }
+                expression { params.BUILDTYPE == 'debug-apk' }
             }
             steps {
                 sh '''
@@ -86,7 +86,7 @@ pipeline {
         }
         stage('Build Release APK') {
             when {
-                expression { params.BUILD_TYPE == 'release-apk' }
+                expression { params.BUILDTYPE == 'release-apk' }
             }
             environment {
                 MYAPP_RELEASE_STORE_PASSWORD = credentials('democicd')
@@ -102,7 +102,7 @@ pipeline {
 
         stage('Build Release AAB') {
             when {
-                expression { params.BUILD_TYPE == 'release-aab' }
+                expression { params.BUILDTYPE == 'release-aab' }
             }
             environment {
                 MYAPP_RELEASE_STORE_PASSWORD = credentials('democicd')
