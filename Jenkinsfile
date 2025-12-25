@@ -12,6 +12,11 @@ pipeline {
             defaultValue: 'democicd',
             description: 'Jenkins Secret Text credential ID containing the keystore/key password'
         )
+        password(
+            name: 'KEYSTORE_PASSWORD',
+            defaultValue: 'democicd',
+            description: 'Optional: provide keystore/key password directly (masked). If set, Jenkins credentials are not used.'
+        )
     }
 
     environment {
@@ -94,14 +99,28 @@ pipeline {
                 expression { params.BUILDTYPE == 'release-apk' }
             }
             steps {
-                withCredentials([
-                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),
-                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),
-                ]) {
-                    sh '''
-                    cd android
-                    ./gradlew assembleRelease
-                    '''
+                script {
+                    if (params.KEYSTORE_PASSWORD?.trim()) {
+                        withEnv([
+                            "MYAPP_RELEASE_STORE_PASSWORD=${params.KEYSTORE_PASSWORD}",
+                            "MYAPP_RELEASE_KEY_PASSWORD=${params.KEYSTORE_PASSWORD}",
+                        ]) {
+                            sh '''
+                            cd android
+                            ./gradlew assembleRelease
+                            '''
+                        }
+                    } else {
+                        withCredentials([
+                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
+                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
+                        ]) {
+                            sh '''
+                            cd android
+                            ./gradlew assembleRelease
+                            '''
+                        }
+                    }
                 }
             }
         }
@@ -110,15 +129,29 @@ pipeline {
             when {
                 expression { params.BUILDTYPE == 'release-aab' }
             }
-                steps {
-                    withCredentials([
-                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),    
-                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),
-                ]) {
-                    sh '''
-                    cd android
-                    ./gradlew bundleRelease
-                    '''
+            steps {
+                script {
+                    if (params.KEYSTORE_PASSWORD?.trim()) {
+                        withEnv([
+                            "MYAPP_RELEASE_STORE_PASSWORD=${params.KEYSTORE_PASSWORD}",
+                            "MYAPP_RELEASE_KEY_PASSWORD=${params.KEYSTORE_PASSWORD}",
+                        ]) {
+                            sh '''
+                            cd android
+                            ./gradlew bundleRelease
+                            '''
+                        }
+                    } else {
+                        withCredentials([
+                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
+                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
+                        ]) {
+                            sh '''
+                            cd android
+                            ./gradlew bundleRelease
+                            '''
+                        }
+                    }
                 }
             }
         }
