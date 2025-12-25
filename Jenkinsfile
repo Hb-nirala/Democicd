@@ -21,9 +21,11 @@ pipeline {
 
     environment {
         ANDROID_HOME = "/Users/hb/Library/Android/sdk"
+        ANDROID_SDK_ROOT = "/Users/hb/Library/Android/sdk"
         JAVA_HOME    = "/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home"
         NODE_BIN = "/Users/hb/.nvm/versions/node/v22.20.0/bin"
         PATH = "${NODE_BIN}:${env.PATH}"
+        GRADLE_USER_HOME = "${WORKSPACE}/.gradle"
 
         MYAPP_RELEASE_STORE_FILE = "my-release-key.keystore"
         MYAPP_RELEASE_KEY_ALIAS = "my-key-alias"
@@ -77,8 +79,9 @@ pipeline {
         stage('Clean Android Build') {
             steps {
                 sh '''
+                set -euo pipefail
                 cd android
-                ./gradlew clean
+                ./gradlew clean --no-daemon --stacktrace
                 '''
             }
         }
@@ -89,8 +92,9 @@ pipeline {
             }
             steps {
                 sh '''
+                set -euo pipefail
                 cd android
-                ./gradlew assembleDebug
+                ./gradlew assembleDebug --no-daemon --stacktrace
                 '''
             }
         }
@@ -107,8 +111,9 @@ pipeline {
                             "MYAPP_RELEASE_KEY_PASSWORD=${keystorePassword}",
                         ]) {
                             sh '''
+                            set -euo pipefail
                             cd android
-                            ./gradlew assembleRelease
+                            ./gradlew assembleRelease --no-daemon --stacktrace
                             '''
                         }
                     } else {
@@ -117,8 +122,9 @@ pipeline {
                             string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
                         ]) {
                             sh '''
+                            set -euo pipefail
                             cd android
-                            ./gradlew assembleRelease
+                            ./gradlew assembleRelease --no-daemon --stacktrace
                             '''
                         }
                     }
@@ -139,8 +145,9 @@ pipeline {
                             "MYAPP_RELEASE_KEY_PASSWORD=${keystorePassword}",
                         ]) {
                             sh '''
+                            set -euo pipefail
                             cd android
-                            ./gradlew bundleRelease
+                            ./gradlew bundleRelease --no-daemon --stacktrace
                             '''
                         }
                     } else {
@@ -149,8 +156,9 @@ pipeline {
                             string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
                         ]) {
                             sh '''
+                            set -euo pipefail
                             cd android
-                            ./gradlew bundleRelease
+                            ./gradlew bundleRelease --no-daemon --stacktrace
                             '''
                         }
                     }
@@ -170,7 +178,7 @@ pipeline {
                 archiveArtifacts(
                     allowEmptyArchive: true,
                     fingerprint: true,
-                    artifacts: 'android/app/build/outputs/apk/**/*.apk,android/app/build/outputs/bundle/**/*.aab'
+                    artifacts: 'android/app/build/outputs/apk/**/*.apk,android/app/build/outputs/bundle/**/*.aab,android/**/build/reports/**'
                 )
             }
         }
