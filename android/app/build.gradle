@@ -95,13 +95,48 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    def getPropOrEnv = { String name ->
+        def value = project.findProperty(name)
+        if (value == null || value.toString().trim().isEmpty()) {
+            value = System.getenv(name)
+        }
+        return value?.toString()
+    }
+
+    def releaseStoreFile = getPropOrEnv("MYAPP_RELEASE_STORE_FILE")
+    def releaseKeyAlias = getPropOrEnv("MYAPP_RELEASE_KEY_ALIAS")
+    def releaseStorePassword = getPropOrEnv("MYAPP_RELEASE_STORE_PASSWORD")
+    def releaseKeyPassword = getPropOrEnv("MYAPP_RELEASE_KEY_PASSWORD")
+
+    def hasCompleteReleaseSigning =
+        releaseStoreFile && releaseKeyAlias && releaseStorePassword && releaseKeyPassword && file(releaseStoreFile).exists()
+
+    def isReleaseRequested = gradle.startParameter.taskNames.any { it.toLowerCase().contains("release") }
+    if (isReleaseRequested && !hasCompleteReleaseSigning) {
+        def missing = []
+        if (!releaseStoreFile) missing << "MYAPP_RELEASE_STORE_FILE"
+        if (releaseStoreFile && !file(releaseStoreFile).exists()) {
+            missing << "MYAPP_RELEASE_STORE_FILE (file not found: ${releaseStoreFile})"
+        }
+        if (!releaseKeyAlias) missing << "MYAPP_RELEASE_KEY_ALIAS"
+        if (!releaseStorePassword) missing << "MYAPP_RELEASE_STORE_PASSWORD"
+        if (!releaseKeyPassword) missing << "MYAPP_RELEASE_KEY_PASSWORD"
+        if (!missing.isEmpty()) {
+            throw new GradleException(
+                "Release signing is not configured. Missing: ${missing.join(', ')}. " +
+                "Set them via environment variables or in android/gradle.properties."
+            )
+        }
+    }
+
     signingConfigs {
         release {
-            if (project.hasProperty('my-release-key.keystore')) {
-                storeFile file('my-release-key.keystore')
-                storePassword 'democicd'
-                keyAlias 'my-key-alias'
-                keyPassword 'democicd'
+            if (hasCompleteReleaseSigning) {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
             }
         }
         debug {

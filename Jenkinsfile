@@ -115,6 +115,23 @@ pipeline {
                 '''
             }
         }
+
+        stage('Archive Android Artifacts') {
+            when {
+                anyOf {
+                    expression { params.BUILDTYPE == 'debug-apk' }
+                    expression { params.BUILDTYPE == 'release-apk' }
+                    expression { params.BUILDTYPE == 'release-aab' }
+                }
+            }
+            steps {
+                archiveArtifacts(
+                    allowEmptyArchive: true,
+                    fingerprint: true,
+                    artifacts: 'android/app/build/outputs/apk/**/*.apk,android/app/build/outputs/bundle/**/*.aab'
+                )
+            }
+        }
     }
 
     post {
