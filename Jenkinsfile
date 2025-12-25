@@ -1,11 +1,22 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'BUILD_TYPE',
+            choices: ['DEBUG_APK', 'RELEASE_APK', 'RELEASE_AAB'],
+            description: 'Select Android build type'
+        )
+    }
+
     environment {
         ANDROID_HOME = "/Users/hb/Library/Android/sdk"
         JAVA_HOME    = "/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home"
         NODE_BIN = "/Users/hb/.nvm/versions/node/v22.20.0/bin"
         PATH = "${NODE_BIN}:${env.PATH}"
+
+        MYAPP_RELEASE_STORE_FILE = "my-release-key.keystore"
+        MYAPP_RELEASE_KEY_ALIAS = "my-key-alias"
     }
 
     stages {
@@ -35,7 +46,10 @@ pipeline {
             }
         }
 
-        stage('Generate Android JS Bundle (Debug)') {
+        stage('Generate JS Bundle (Release)') {
+            when {
+                expression { params.BUILD_TYPE != 'debug-apk' }
+            }
             steps {
                 sh '''
                 mkdir -p android/app/src/main/assets
@@ -59,11 +73,45 @@ pipeline {
             }
         }
 
-        stage('Build Android Debug APK') {
+        stage('Build Debug APK') {
+            when {
+                expression { params.BUILD_TYPE == 'debug-apk' }
+            }
             steps {
                 sh '''
                 cd android
                 ./gradlew assembleDebug
+                '''
+            }
+        }
+        stage('Build Release APK') {
+            when {
+                expression { params.BUILD_TYPE == 'release-apk' }
+            }
+            environment {
+                MYAPP_RELEASE_STORE_PASSWORD = credentials('democicd')
+                MYAPP_RELEASE_KEY_PASSWORD   = credentials('democicd')
+            }
+            steps {
+                sh '''
+                cd android
+                ./gradlew assembleRelease
+                '''
+            }
+        }
+
+        stage('Build Release AAB') {
+            when {
+                expression { params.BUILD_TYPE == 'release-aab' }
+            }
+            environment {
+                MYAPP_RELEASE_STORE_PASSWORD = credentials('democicd')
+                MYAPP_RELEASE_KEY_PASSWORD   = credentials('democicd')
+            }
+            steps {
+                sh '''
+                cd android
+                ./gradlew bundleRelease
                 '''
             }
         }
