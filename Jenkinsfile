@@ -27,7 +27,8 @@ pipeline {
         PATH = "${NODE_BIN}:${env.PATH}"
         GRADLE_USER_HOME = "${WORKSPACE}/.gradle"
 
-        MYAPP_RELEASE_STORE_FILE = "my-release-key.keystore"
+    MYAPP_RELEASE_STORE_FILE = "/Users/hb/Desktop/Democicd/android/app/my-release-key.keystore"
+        // MYAPP_RELEASE_STORE_FILE = "my-release-key.keystore"
         MYAPP_RELEASE_KEY_ALIAS = "my-key-alias"
     }
 
