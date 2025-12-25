@@ -7,6 +7,11 @@ pipeline {
             choices: ['debug-apk', 'release-apk', 'release-aab'],
             description: 'Select Android build type'
         )
+        string(
+            name: 'KEYSTORE_PASSWORD_CREDENTIAL_ID',
+            defaultValue: 'democicd',
+            description: 'Jenkins Secret Text credential ID containing the keystore/key password'
+        )
     }
 
     environment {
@@ -88,15 +93,16 @@ pipeline {
             when {
                 expression { params.BUILDTYPE == 'release-apk' }
             }
-            environment {
-                MYAPP_RELEASE_STORE_PASSWORD = credentials('democicd')
-                MYAPP_RELEASE_KEY_PASSWORD   = credentials('democicd')
-            }
             steps {
-                sh '''
-                cd android
-                ./gradlew assembleRelease
-                '''
+                withCredentials([
+                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),
+                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),
+                ]) {
+                    sh '''
+                    cd android
+                    ./gradlew assembleRelease
+                    '''
+                }
             }
         }
 
@@ -104,15 +110,16 @@ pipeline {
             when {
                 expression { params.BUILDTYPE == 'release-aab' }
             }
-            environment {
-                MYAPP_RELEASE_STORE_PASSWORD = credentials('democicd')
-                MYAPP_RELEASE_KEY_PASSWORD   = credentials('democicd')
-            }
-            steps {
-                sh '''
-                cd android
-                ./gradlew bundleRelease
-                '''
+                steps {
+                    withCredentials([
+                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),    
+                    string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'democicd'),
+                ]) {
+                    sh '''
+                    cd android
+                    ./gradlew bundleRelease
+                    '''
+                }
             }
         }
 
