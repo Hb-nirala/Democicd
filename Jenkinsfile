@@ -44,13 +44,13 @@ pipeline {
             }
             steps {
                 withCredentials([
-                file(credentialsId: 'android-keystore', variable: 'KS'),
+                file(credentialsId: 'android-keystore', variable: 'MYAPP_RELEASE_STORE_FILE'),
                 string(credentialsId: 'keystore-password', variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
                 string(credentialsId: 'key-password', variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
                 string(credentialsId: 'key-alias', variable: 'MYAPP_RELEASE_KEY_ALIAS')
                 ]) {
                     sh '''
-                    cp "$KS" android/app/my-release-key.keystore
+                    cp "$MYAPP_RELEASE_STORE_FILE" android/app/my-release-key.keystore
                     '''
                 }
             }
