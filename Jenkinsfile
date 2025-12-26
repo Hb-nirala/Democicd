@@ -39,6 +39,22 @@ pipeline {
             }
         }
 
+        stage('Prepare Keystore') {
+            when {
+                expression { params.BUILDTYPE != 'debug-apk' }
+            }
+            steps {
+                withCredentials([file(credentialsId: 'democicd', variable: 'MYAPP_RELEASE_STORE_FILE')]) {
+                    sh '''
+                    echo "Copying Android keystore..."
+                    mkdir -p android/app
+                    cp "$MYAPP_RELEASE_STORE_FILE" android/app/my-release-key.keystore
+                    ls -l android/app
+                '''
+                }
+            }
+        }
+
         stage('Verify Node') {
             steps {
             sh '''
