@@ -27,8 +27,7 @@ pipeline {
         PATH = "${NODE_BIN}:${env.PATH}"
         GRADLE_USER_HOME = "${WORKSPACE}/.gradle"
 
-        // MYAPP_RELEASE_STORE_FILE = "${WORKSPACE}/android/app/my-release-key.keystore"
-        MYAPP_RELEASE_KEY_ALIAS = "my-key-alias"
+        MYAPP_RELEASE_STORE_FILE = "${WORKSPACE}/android/app/my-release-key.keystore"
     }
 
     stages {
@@ -44,11 +43,15 @@ pipeline {
                 expression { params.BUILDTYPE != 'debug-apk' }
             }
             steps {
-                withCredentials([file(credentialsId: 'democicd', variable: 'KS'),
-                    string(credentialsId: 'democicd', variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
-                    string(credentialsId: 'my-key-alias', variable: 'MYAPP_RELEASE_KEY_ALIAS'),
-                    string(credentialsId: 'democicd', variable: 'MYAPP_RELEASE_KEY_PASSWORD')]) {
-                    sh 'cp $KS android/app/my-release-key.keystore'
+                withCredentials([
+                file(credentialsId: 'android-keystore', variable: 'KS'),
+                string(credentialsId: 'keystore-password', variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
+                string(credentialsId: 'key-password', variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
+                string(credentialsId: 'key-alias', variable: 'MYAPP_RELEASE_KEY_ALIAS')
+                ]) {
+                    sh '''
+                    cp "$KS" android/app/my-release-key.keystore
+                    '''
                 }
             }
         }
