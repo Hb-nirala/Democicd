@@ -39,21 +39,19 @@ pipeline {
             }
         }
 
-        // stage('Prepare Keystore') {
-        //     when {
-        //         expression { params.BUILDTYPE != 'debug-apk' }
-        //     }
-        //     steps {
-        //         withCredentials([file(credentialsId: 'democicd', variable: 'MYAPP_RELEASE_STORE_FILE')]) {
-        //             sh '''
-        //             echo "Copying Android keystore..."
-        //             mkdir -p android/app
-        //             cp "$MYAPP_RELEASE_STORE_FILE" android/app/my-release-key.keystore
-        //             ls -l android/app
-        //         '''
-        //         }
-        //     }
-        // }
+        stage('Prepare Keystore') {
+            when {
+                expression { params.BUILDTYPE != 'debug-apk' }
+            }
+            steps {
+                withCredentials([file(credentialsId: 'democicd', variable: 'KS'),
+                    string(credentialsId: 'democicd', variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
+                    string(credentialsId: 'my-key-alias', variable: 'MYAPP_RELEASE_KEY_ALIAS'),
+                    string(credentialsId: 'democicd', variable: 'MYAPP_RELEASE_KEY_PASSWORD')]) {
+                    sh 'cp $KS android/app/my-release-key.keystore'
+                }
+            }
+        }
 
         stage('Verify Node') {
             steps {
@@ -118,30 +116,11 @@ pipeline {
                 expression { params.BUILDTYPE == 'release-apk' }
             }
             steps {
-                script {
-                    def keystorePassword = params.KEYSTORE_PASSWORD == null ? "" : params.KEYSTORE_PASSWORD.toString()
-                    if (keystorePassword.trim()) {
-                        withEnv([
-                            "MYAPP_RELEASE_STORE_PASSWORD=${keystorePassword}",
-                            "MYAPP_RELEASE_KEY_PASSWORD=${keystorePassword}",
-                        ]) {
-                            sh '''
-                            cd android
-                            ./gradlew assembleRelease
-                            '''
-                        }
-                    } else {
-                        withCredentials([
-                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
-                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
-                        ]) {
-                            sh '''
-                            cd android
-                            ./gradlew assembleRelease
-                            '''
-                        }
-                    }
-                }
+                
+                sh '''
+                cd android
+                ./gradlew assembleRelease
+                '''
             }
         }
 
@@ -150,30 +129,10 @@ pipeline {
                 expression { params.BUILDTYPE == 'release-aab' }
             }
             steps {
-                script {
-                    def keystorePassword = params.KEYSTORE_PASSWORD == null ? "" : params.KEYSTORE_PASSWORD.toString()
-                    if (keystorePassword.trim()) {
-                        withEnv([
-                            "MYAPP_RELEASE_STORE_PASSWORD=${keystorePassword}",
-                            "MYAPP_RELEASE_KEY_PASSWORD=${keystorePassword}",
-                        ]) {
-                            sh '''
-                            cd android
-                            ./gradlew bundleRelease
-                            '''
-                        }
-                    } else {
-                        withCredentials([
-                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_STORE_PASSWORD'),
-                            string(credentialsId: params.KEYSTORE_PASSWORD_CREDENTIAL_ID, variable: 'MYAPP_RELEASE_KEY_PASSWORD'),
-                        ]) {
-                            sh '''
-                            cd android
-                            ./gradlew bundleRelease
-                            '''
-                        }
-                    }
-                }
+                sh '''
+                cd android
+                ./gradlew bundleRelease
+                '''
             }
         }
 
