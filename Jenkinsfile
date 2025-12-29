@@ -190,7 +190,6 @@ pipeline {
 
                 FILE_ID=$(gdrive files upload \
                 --parent 1gs78v2H82xwdw-WfSmpwwpcpuprb7qyo \
-                --quiet \
                 "$APK_PATH")
 
                 echo "FILE_ID=$FILE_ID" > apk_info.txt
