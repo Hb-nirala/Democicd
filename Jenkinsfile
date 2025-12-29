@@ -162,7 +162,7 @@ pipeline {
 
     post {
         success {
-            emailext(
+            mail(
                 subject: "✅ APK Build Success - ${JOB_NAME} #${BUILD_NUMBER}",
                 body: """
                     <h2>✅ React Native APK Build Successful</h2>
@@ -179,7 +179,7 @@ pipeline {
             )
         }
         failure {
-            emailext(
+            mail(
                 subject: "❌ APK Build FAILED - ${JOB_NAME} #${BUILD_NUMBER}",
                 body: """
                     <h2>❌ React Native APK Build FAILED</h2>
