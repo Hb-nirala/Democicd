@@ -50,6 +50,9 @@ pipeline {
                 string(credentialsId: 'key-alias', variable: 'MYAPP_RELEASE_KEY_ALIAS')
                 ]) {
                     sh '''
+                    echo "Preparing keystore..."
+                    chmod -R u+w android/app
+                    rm -f android/app/my-release-key.keystore
                     cp "$MYAPP_RELEASE_STORE_FILE" android/app/my-release-key.keystore
                     '''
                 }
