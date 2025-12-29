@@ -189,8 +189,14 @@ pipeline {
                 echo "APK Name : $APK_NAME"
 
                 FILE_ID=$(gdrive files upload \
-                --parent 1gs78v2H82xwdw-WfSmpwwpcpuprb7qyo \
-                "$APK_PATH")
+                    --parent 1gs78v2H82xwdw-WfSmpwwpcpuprb7qyo \
+                    "$APK_PATH" \
+                    | grep '^Id:' | awk '{print $2}')
+
+                if [ -z "$FILE_ID" ]; then
+                    echo "❌ Failed to get Google Drive File ID"
+                    exit 1
+                fi
 
                 echo "FILE_ID=$FILE_ID" > apk_info.txt
                 echo "APK uploaded successfully with ID: $FILE_ID"
@@ -204,6 +210,7 @@ pipeline {
                 source apk_info.txt
                 APK_LINK="https://drive.google.com/file/d/$FILE_ID/view?usp=sharing"
                 echo "APK_LINK=$APK_LINK" > apk_link.txt
+                echo "Generated APK download link: $APK_LINK"
                 '''
             }
         }
