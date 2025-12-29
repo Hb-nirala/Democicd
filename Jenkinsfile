@@ -24,8 +24,11 @@ pipeline {
         ANDROID_SDK_ROOT = "/Users/hb/Library/Android/sdk"
         JAVA_HOME    = "/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home"
         NODE_BIN = "/Users/hb/.nvm/versions/node/v22.20.0/bin"
-        PATH = "${NODE_BIN}:${env.PATH}"
         GRADLE_USER_HOME = "${WORKSPACE}/.gradle"
+
+        GDRIVE_BIN = "/usr/local/bin"
+
+        PATH = "${NODE_BIN}:${GDRIVE_BIN}:${env.PATH}"
 
         MYAPP_RELEASE_STORE_FILE = "${WORKSPACE}/android/app/my-release-key.keystore"
     }
@@ -68,6 +71,15 @@ pipeline {
             npm -v
             '''
             }
+        }
+
+        stage('Verify gdrive') { 
+            steps { 
+                sh ''' 
+                    which gdrive || true 
+                    gdrive version || true 
+                ''' 
+            } 
         }
 
         stage('Install Node Dependencies') {
@@ -162,12 +174,23 @@ pipeline {
         stage('Upload APK to Google Drive') {
             steps {
                 sh '''
-                APK_PATH=android/app/build/outputs/apk/**/*.apk
+                echo "Finding APK..."
+                APK_PATH=$(ls android/app/build/outputs/apk/**/*.apk | head -n 1)
+
+                if [ -z "$APK_PATH" ]; then
+                    echo "❌ APK not found"
+                    exit 1
+                fi
+
+                APK_NAME=$(basename "$APK_PATH")
 
                 echo "Uploading APK to Google Drive..."
+                echo "APK Path : $APK_PATH"
+                echo "APK Name : $APK_NAME"
+
                 FILE_ID=$(gdrive files upload \
                 --parent 1gs78v2H82xwdw-WfSmpwwpcpuprb7qyo \
-                --name app-release-${BUILD_NUMBER}.apk \
+                --name ${APK_NAME} \
                 --quiet \
                 "$APK_PATH")
 
