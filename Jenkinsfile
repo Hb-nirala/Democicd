@@ -190,7 +190,6 @@ pipeline {
 
                 FILE_ID=$(gdrive files upload \
                 --parent 1gs78v2H82xwdw-WfSmpwwpcpuprb7qyo \
-                --name ${APK_NAME} \
                 --quiet \
                 "$APK_PATH")
 
