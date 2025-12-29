@@ -72,14 +72,15 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
-android.applicationVariants.all { variant ->
-    if (variant.buildType.name == "debug") {
+android.applicationVariants.all { variant -> 
         variant.outputs.all { output ->
             def appName = "Democicd"
+            def buildType = variant.buildType.name
             def date = new Date().format("dd-MM-yyyy_hh-mma")
-            outputFileName = "${appName}-debug_${date}.apk"
+            if(output.outputFileName.endsWith(".apk")) {
+                output.outputFileName = "${appName}-${buildType}_${date}.apk"
+            }
         }
-    }
 }
 
 android {
