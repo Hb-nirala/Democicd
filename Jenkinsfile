@@ -173,9 +173,14 @@ pipeline {
 
                     <p>You can view the build details here:</p>
                     <a href="${BUILD_URL}">${BUILD_URL}</a>
+                    <p><b>APK file is attached with this email.</b></p>
                 """,
                 to: "niralak025@gmail.com",
-                mimeType: "text/html"
+                mimeType: "text/html",
+                attachmentsPattern: """
+                android/app/build/outputs/**/*.apk,
+                android/app/build/outputs/**/*.aab
+                """
             )
         }
         failure {
