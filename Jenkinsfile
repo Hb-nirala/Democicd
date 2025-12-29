@@ -190,30 +190,35 @@ pipeline {
 
     post {
         success {
-            def apkLink = sh(
+            script {
+                def apkLink = sh(
                 script: "source apk_link.txt && echo \$APK_LINK",
                 returnStdout: true
-            ).trim()
-            mail(
-                subject: "✅ APK Build Success - ${JOB_NAME} #${BUILD_NUMBER}",
-                body: """
-                    <h2>✅ React Native APK Build Successful</h2>
+                ).trim()
+            echo "APK Download Link: ${apkLink}"
+            echo "Sending success email with APK link..."
+                mail(
+                    subject: "✅ APK Build Success - ${JOB_NAME} #${BUILD_NUMBER}",
+                    body: """
+                        <h2>✅ React Native APK Build Successful</h2>
 
-                    <p><b>Job:</b> ${JOB_NAME}</p>
-                    <p><b>Build:</b> #${BUILD_NUMBER}</p>
-                    <p><b>Status:</b> ${currentBuild.currentResult}</p>
+                        <p><b>Job:</b> ${JOB_NAME}</p>
+                        <p><b>Build:</b> #${BUILD_NUMBER}</p>
+                        <p><b>Status:</b> ${currentBuild.currentResult}</p>
 
-                    <p>You can view the build details here:</p>
-                    <a href="${BUILD_URL}">${BUILD_URL}</a>
-                    <p><b>APK file is attached with this email.</b></p>
-                    <p><b>Download APK:</b></p>
-                    <p><a href="${apkLink}">${apkLink}</a></p>
-                """,
-                to: "niralak025@gmail.com",
-                mimeType: "text/html",
-            )
+                        <p>You can view the build details here:</p>
+                        <a href="${BUILD_URL}">${BUILD_URL}</a>
+                        <p><b>APK file is attached with this email.</b></p>
+                        <p><b>Download APK:</b></p>
+                        <p><a href="${apkLink}">${apkLink}</a></p>
+                    """,
+                    to: "niralak025@gmail.com",
+                    mimeType: "text/html",
+                )
+            }
         }
         failure {
+            echo "APK build failed. Sending failure email."
             mail(
                 subject: "❌ APK Build FAILED - ${JOB_NAME} #${BUILD_NUMBER}",
                 body: """
