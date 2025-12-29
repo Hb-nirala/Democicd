@@ -176,11 +176,7 @@ pipeline {
                     <p><b>APK file is attached with this email.</b></p>
                 """,
                 to: "niralak025@gmail.com",
-                mimeType: "text/html",
-                attachmentsPattern: """
-                android/app/build/outputs/**/*.apk,
-                android/app/build/outputs/**/*.aab
-                """
+                mimeType: "text/html"
             )
         }
         failure {
