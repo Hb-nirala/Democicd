@@ -158,10 +158,42 @@ pipeline {
                 )
             }
         }
+
+        stage('Upload APK to Google Drive') {
+            steps {
+                sh '''
+                APK_PATH=android/app/build/outputs/apk/**/*.apk
+
+                echo "Uploading APK to Google Drive..."
+                FILE_ID=$(gdrive files upload \
+                --parent 1gs78v2H82xwdw-WfSmpwwpcpuprb7qyo \
+                --name app-release-${BUILD_NUMBER}.apk \
+                --quiet \
+                "$APK_PATH")
+
+                echo "FILE_ID=$FILE_ID" > apk_info.txt
+                echo "APK uploaded successfully with ID: $FILE_ID"
+                '''
+            }
+        }
+
+        stage('Generate APK Download Link') {
+            steps {
+                sh '''
+                source apk_info.txt
+                APK_LINK="https://drive.google.com/file/d/$FILE_ID/view?usp=sharing"
+                echo "APK_LINK=$APK_LINK" > apk_link.txt
+                '''
+            }
+        }
     }
 
     post {
         success {
+            def apkLink = sh(
+                script: "source apk_link.txt && echo \$APK_LINK",
+                returnStdout: true
+            ).trim()
             mail(
                 subject: "✅ APK Build Success - ${JOB_NAME} #${BUILD_NUMBER}",
                 body: """
@@ -174,10 +206,11 @@ pipeline {
                     <p>You can view the build details here:</p>
                     <a href="${BUILD_URL}">${BUILD_URL}</a>
                     <p><b>APK file is attached with this email.</b></p>
+                    <p><b>Download APK:</b></p>
+                    <p><a href="${apkLink}">${apkLink}</a></p>
                 """,
                 to: "niralak025@gmail.com",
                 mimeType: "text/html",
-                attachmentsPattern: "android/app/build/outputs/**/*.apk"
             )
         }
         failure {
