@@ -17,6 +17,11 @@ pipeline {
             defaultValue: 'democicd',
             description: 'Optional: provide keystore/key password directly (masked). If set, Jenkins credentials are not used.'
         )
+        string(
+            name: 'NOTIFY_EMAIL',
+            defaultValue: '',
+            description: 'Email address to receive build notifications'
+        )
     }
 
     environment {
@@ -34,6 +39,16 @@ pipeline {
     }
 
     stages {
+        
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!params.NOTIFY_EMAIL?.trim()) {
+                        error "❌ NOTIFY_EMAIL is required. Please provide an email address before starting the build."
+                    }
+                }
+            }
+        }
 
         stage('Checkout Code') {
             steps {
@@ -173,6 +188,9 @@ pipeline {
 
         stage('Upload APK to Google Drive') {
             steps {
+                withCredentials([
+                string(credentialsId: 'gdrive-folder-id', variable: 'GDRIVE_FOLDER_ID')
+                ]) {
                 sh '''
                 echo "Finding APK..."
                 APK_PATH=$(ls android/app/build/outputs/apk/**/*.apk | head -n 1)
@@ -189,9 +207,9 @@ pipeline {
                 echo "APK Name : $APK_NAME"
 
                 FILE_ID=$(gdrive files upload \
-                    --parent 1gs78v2H82xwdw-WfSmpwwpcpuprb7qyo \
+                    --parent "$GDRIVE_FOLDER_ID" \
                     "$APK_PATH" \
-                    | grep '^Id:' | awk '{print $2}')
+                    2>&1 | grep '^Id:' | awk '{print $2}')
 
                 if [ -z "$FILE_ID" ]; then
                     echo "❌ Failed to get Google Drive File ID"
@@ -201,6 +219,7 @@ pipeline {
                 echo "FILE_ID=$FILE_ID" > apk_info.txt
                 echo "APK uploaded successfully with ID: $FILE_ID"
                 '''
+                }
             }
         }
 
@@ -240,7 +259,7 @@ pipeline {
                         <p><b>Download APK:</b></p>
                         <p><a href="${apkLink}">${apkLink}</a></p>
                     """,
-                    to: "niralak025@gmail.com",
+                    to: "${params.NOTIFY_EMAIL}",
                     mimeType: "text/html",
                 )
             }
